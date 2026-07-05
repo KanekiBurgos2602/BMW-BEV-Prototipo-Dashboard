@@ -1,0 +1,68 @@
+{# ============================================================
+   hora.html — shell estático de Hora por Hora + plantilla de
+   fila. La lógica (hora.js) solo actualiza textos, clases y
+   estilos data-driven cada segundo; no genera HTML.
+   ============================================================ #}
+<div class="surface">
+  <div class="surface-pad hora-wrap">
+    <div class="panel hora-panel">
+      <div class="panel-vignette"></div>
+      <div class="panel-header">
+        <div class="title-group">
+          <div class="icon-box">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E0473B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2.5 2"></path><path d="M9 2h6"></path></svg>
+          </div>
+          <div class="panel-title">HORA POR HORA · <span class="shift-name"></span></div>
+        </div>
+        <div class="online-badge"><span class="dot"></span><span class="label">ONLINE</span></div>
+      </div>
+
+      <div class="turnos">
+        <div class="turno" data-shift="1"><span class="dot"></span><span class="name">TURNO 1</span><span class="win">07:20 – 14:50</span></div>
+        <div class="turno" data-shift="2"><span class="dot"></span><span class="name">TURNO 2</span><span class="win">15:20 – 22:20</span></div>
+        <div class="turno" data-shift="3"><span class="dot"></span><span class="name">TURNO 3</span><span class="win">22:50 – 06:50</span></div>
+      </div>
+
+      <div class="led-divider hora-divider"></div>
+
+      <div class="waiting-banner" style="display:none">
+        <span class="dot"></span>
+        <div class="msg">TURNO FINALIZADO · datos guardados · esperando el inicio del siguiente turno</div>
+      </div>
+
+      <div class="console hora-table">
+        <div class="hrow head"><div>Hora</div><div>Esperadas</div><div>Producidas</div><div>Eficiencia</div><div>QL</div></div>
+        <div class="hrow-hair"></div>
+        <div class="hora-rows"></div>
+        <div class="hora-gap"></div>
+        <div class="hrow total">
+          <div class="label">Total Turno</div>
+          <div class="num t-expected" style="color:#EDE4DC"></div>
+          <div class="num t-produced" style="color:#F4ECEC;text-shadow:0 0 12px rgba(255,255,255,.15)"></div>
+          <div class="hcell-eff eff">
+            <div class="val t-eff-val"></div>
+            <div class="bar-track"><div class="bar-fill t-eff-fill"></div></div>
+          </div>
+          <div class="num t-ql"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<template id="tpl-hora-row">
+  <div class="hrow data">
+    <div class="hcell-hora">
+      <span class="dot"></span>
+      <div class="label"></div>
+      <span class="tag"></span>
+    </div>
+    <div class="hcell-num expected"></div>
+    <div class="hcell-num produced"></div>
+    <div class="hcell-eff">
+      <div class="val"></div>
+      <div class="bar-track"><div class="bar-fill"></div></div>
+    </div>
+    <div class="hcell-num ql"></div>
+  </div>
+</template>

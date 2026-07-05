@@ -1,0 +1,163 @@
+/* ============================================================
+   base.css — tokens, tipografías, reset, animaciones y "chrome"
+   compartido por todos los paneles del dashboard.
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Oxanium:wght@500;600;700&family=Saira+Condensed:wght@500;600;700&family=Share+Tech+Mono&display=swap");
+
+:root {
+  --green:   #22E62C;
+  --red:     #FF5347;
+  --red-dk:  #E0473B;
+  --red-soft:#FF6358;
+  --amber:   #F5A623;
+  --blue:    #38BDF8;
+  --blue-dk: #2E72E6;
+  --neutral: #C9CDD4;
+
+  --ink:      #EFEAE6;
+  --ink-2:    #C9BBB8;
+  --ink-mute: #857069;
+  --ink-faint:#7B5C58;
+
+  --panel-border: #2c2c31;
+  --hair: rgba(190,190,198,.4);
+
+  --font-body: Archivo, system-ui, sans-serif;
+  --font-head: Oxanium, sans-serif;
+  --font-cond: "Saira Condensed", sans-serif;
+  --font-mono: "Share Tech Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #050506;
+  font-family: var(--font-body);
+  color: var(--ink);
+}
+
+@keyframes pulse     { 0%,100%{opacity:1}   50%{opacity:.3} }
+@keyframes rowScan   { 0%,100%{opacity:.5}  50%{opacity:1} }
+@keyframes haloPulse { 0%,100%{opacity:.35} 50%{opacity:.85} }
+@keyframes ringPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(1.07)} }
+@keyframes modalFade { from{opacity:0} to{opacity:1} }
+@keyframes modalPop  { from{opacity:0;transform:translateY(16px) scale(.97)} to{opacity:1;transform:none} }
+
+/* ---- outer surface each component sits on ---- */
+.surface {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  background: radial-gradient(120% 90% at 50% -8%, #121214, #070708 62%, #050506);
+}
+.surface > .surface-pad {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- the machined metal panel (repeated in every module) ---- */
+.panel {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  border: 1px solid var(--panel-border);
+  overflow: hidden;
+  background-color: #101012;
+  background-image:
+    linear-gradient(27deg,#16161a 5px,transparent 5px),
+    linear-gradient(207deg,#16161a 5px,transparent 5px),
+    linear-gradient(27deg,#1d1d22 5px,transparent 5px),
+    linear-gradient(207deg,#1d1d22 5px,transparent 5px),
+    linear-gradient(90deg,#191920 10px,transparent 10px),
+    linear-gradient(#1a1a1f 25%,#161619 25%,#161619 50%,transparent 50%,transparent 75%,#202026 75%,#202026);
+  background-position: 0 5px,10px 0,0 10px,10px 5px,0 0,0 0;
+  background-size: 20px 20px;
+  box-shadow:
+    0 40px 90px -40px rgba(0,0,0,.9),
+    inset 0 1px 0 rgba(255,255,255,.06),
+    inset 0 0 0 1px rgba(0,0,0,.4);
+}
+
+/* neutral depth vignette overlay */
+.panel-vignette {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 100% at 50% 120%, rgba(0,0,0,.5), transparent 52%),
+    radial-gradient(120% 80% at 50% -10%, rgba(255,255,255,.03), transparent 50%);
+}
+
+/* header bar inside a panel */
+.panel-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 15px;
+  border-radius: 12px;
+  background: linear-gradient(180deg,#1b1d22,#0f1115);
+  border: 1px solid #2b2e35;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 8px -4px rgba(0,0,0,.7);
+}
+.panel-header .title-group { display: flex; align-items: center; gap: 12px; }
+.panel-title {
+  font: 700 15px/1 var(--font-head);
+  color: var(--ink);
+  letter-spacing: .13em;
+  white-space: nowrap;
+}
+.icon-box {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(160deg,#1a1c21,#111318);
+  border: 1px solid #34383f;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.06), 0 0 10px -2px rgba(240,71,59,.4);
+}
+
+/* "ONLINE" status pill */
+.online-badge { display: flex; align-items: center; gap: 8px; }
+.online-badge .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: pulse 2.2s infinite;
+}
+.online-badge .label {
+  font: 700 10px/1 var(--font-head);
+  letter-spacing: .16em;
+  color: var(--green);
+}
+
+/* thin ambient LED divider */
+.led-divider {
+  position: relative;
+  height: 1px;
+  flex: 0 0 auto;
+  background: linear-gradient(90deg, transparent, var(--hair), transparent);
+}
+
+/* inset console area (table / grid backdrop) */
+.console {
+  position: relative;
+  background: linear-gradient(180deg,#0e0e11,#090909);
+  border: 1px solid #26262b;
+  border-radius: 14px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    inset 0 -16px 34px rgba(0,0,0,.5),
+    0 2px 0 rgba(0,0,0,.4);
+}

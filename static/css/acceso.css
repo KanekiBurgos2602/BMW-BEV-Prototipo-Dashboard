@@ -1,0 +1,50 @@
+/* ============================================================
+   acceso.css — Control de Acceso operators grid + detail overlay
+   ============================================================ */
+
+.acc-wrap { flex: 1; min-height: 0; padding: 12px 14px; display: flex; flex-direction: column; }
+.acc-panel { padding: 16px 20px 18px; }
+
+.acc-divider { margin: 12px 0; }
+
+.acc-subhead { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex: 0 0 auto; }
+.acc-subhead .lbl { font: 700 11px/1 var(--font-head); letter-spacing: .18em; text-transform: uppercase; color: #E7DAD8; }
+.acc-subhead .count { display: flex; align-items: center; gap: 7px; }
+.acc-subhead .count .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+.acc-subhead .count .txt { font: 600 9px/1 var(--font-head); letter-spacing: .14em; text-transform: uppercase; color: #A98C88; }
+
+.acc-grid {
+  position: relative; flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  grid-template-rows: repeat(2, minmax(0,1fr));
+  gap: 8px;
+}
+.acc-cell { cursor: pointer; min-height: 0; min-width: 0; display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
+
+/* detail overlay */
+.acc-overlay {
+  position: absolute; inset: 0; z-index: 40;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  background: rgba(4,4,6,.74);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  border-radius: 22px;
+  animation: modalFade .16s ease;
+}
+.acc-overlay .sheet {
+  position: relative;
+  width: min(420px,100%);
+  border-radius: 20px;
+  background: linear-gradient(180deg,#141418,#0b0b0d);
+  border: 1px solid #2d2d34;
+  box-shadow: 0 50px 100px -30px rgba(0,0,0,.95);
+  animation: modalPop .2s cubic-bezier(.22,.85,.24,1);
+}
+.acc-overlay .close {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  width: 32px; height: 32px; border-radius: 9px;
+  border: 1px solid #35353d; background: #17171b; color: #C9BFBD;
+  font: 700 18px/1 var(--font-head); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}

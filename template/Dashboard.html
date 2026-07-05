@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard BMW BEV — Línea 3</title>
+
+  <link rel="stylesheet" href="static/css/base.css">
+  <link rel="stylesheet" href="static/css/dashboard.css">
+  <link rel="stylesheet" href="static/css/calendario.css">
+  <link rel="stylesheet" href="static/css/hora.css">
+  <link rel="stylesheet" href="static/css/acceso.css">
+  <link rel="stylesheet" href="static/css/tacometro.css">
+</head>
+<body>
+  <div class="viewport">
+    <div class="stage">
+
+      <!-- TOP BAR -->
+      <header class="topbar">
+        <div class="left">
+          <img class="logo-magna" src="static/img/magna-white.png" alt="Magna">
+        </div>
+        <div class="mid">
+          <div class="brand-title">AUTOTEK MEXICO · DIGITAL OPERATIONS MANAGEMENT PLATFORM · BMW BEV</div>
+        </div>
+        <div class="right">
+          <div class="clock-pill"><span class="dot"></span><span class="time">--:--:--</span></div>
+          <span class="date"></span>
+          <span class="sep"></span>
+          <img class="logo-mafact" src="static/img/mafact-white.png" alt="MAFACT">
+        </div>
+      </header>
+
+      <!-- TOP · 8 CALENDARIOS -->
+      <section class="row-top" data-screen-label="Calendario">
+        <div id="mod-calendario">{% include 'partials/calendario.html' %}</div>
+      </section>
+
+      <!-- BOTTOM · HORA POR HORA + CONTROL DE ACCESO -->
+      <section class="row-bottom">
+        <div class="module-frame" data-screen-label="Hora por Hora"><div id="mod-hora">{% include 'partials/hora.html' %}</div></div>
+        <div class="module-frame" data-screen-label="Control de Acceso"><div id="mod-acceso">{% include 'partials/acceso.html' %}</div></div>
+      </section>
+
+    </div>
+  </div>
+
+  {% include 'partials/tacometro.html' %}
+
+
+  <script src="static/js/tacometro.js"></script>
+  <script src="static/js/acceso.js"></script>
+  <script src="static/js/hora.js"></script>
+  <script src="static/js/calendario.js"></script>
+  <script src="static/js/dashboard.js"></script>
+</body>
+</html>

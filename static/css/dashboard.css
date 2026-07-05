@@ -1,0 +1,109 @@
+/* ============================================================
+   dashboard.css — top bar, fixed-resolution stage and the
+   overall grid that places the three modules.
+   ============================================================ */
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(120% 70% at 50% -6%, #141416, #070708 60%, #050506);
+}
+
+/* 1920x1080 stage scaled uniformly to fill the viewport */
+.stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: center center;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+}
+
+/* ---- top bar ---- */
+.topbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  padding: 7px 18px;
+  border-radius: 12px;
+  background-color: #0d0d0f;
+  background-image: linear-gradient(90deg, rgba(255,255,255,.02), transparent);
+  border: 1px solid #23232a;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 10px 30px -18px rgba(0,0,0,.9);
+}
+.topbar .left  { display: flex; align-items: center; justify-self: start; }
+.topbar .mid   { display: flex; align-items: center; justify-content: center; }
+.topbar .right { display: flex; align-items: center; gap: 11px; justify-self: end; }
+
+.topbar .logo-magna  { height: 16px; width: auto; display: block; }
+.topbar .logo-mafact { height: 17px; width: auto; display: block; }
+
+.topbar .brand-title {
+  font: 700 11px/1 var(--font-head);
+  letter-spacing: .11em;
+  color: var(--red-soft);
+  white-space: nowrap;
+}
+
+.clock-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: rgba(34,230,44,.08);
+  border: 1px solid rgba(34,230,44,.30);
+}
+.clock-pill .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 7px var(--green);
+  animation: pulse 2.2s infinite;
+}
+.clock-pill .time {
+  font: 400 10px/1 var(--font-mono);
+  color: #8BE68F;
+  letter-spacing: .06em;
+}
+.topbar .date {
+  font: 400 10px/1 var(--font-mono);
+  color: #8C7370;
+  letter-spacing: .04em;
+}
+.topbar .sep { width: 1px; height: 14px; background: #2f2a2a; }
+
+/* ---- module placement ---- */
+.row-top {
+  flex: 1 1 40%;
+  min-height: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #23232a;
+  box-shadow: 0 20px 50px -30px rgba(0,0,0,.9);
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+.row-bottom {
+  flex: 1 1 60%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0,1.02fr) minmax(0,0.98fr);
+  gap: 18px;
+  align-items: stretch;
+}
+.module-frame {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid #23232a;
+  box-shadow: 0 20px 50px -30px rgba(0,0,0,.9);
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  min-height: 0;
+}
