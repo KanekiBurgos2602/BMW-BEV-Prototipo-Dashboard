@@ -1,6 +1,6 @@
 /* ============================================================
-   dashboard.css — top bar, fixed-resolution stage and the
-   overall grid that places the three modules.
+   dashboard.css — Layout estructural del escenario y 
+   animaciones de entrada en cascada
    ============================================================ */
 
 .viewport {
@@ -23,6 +23,10 @@
   flex-direction: column;
   gap: 14px;
   padding: 16px 20px;
+  
+  /* OPTIMIZACIÓN: Prepara a la GPU para los cálculos de redimensionado */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 /* ---- top bar ---- */
@@ -77,7 +81,7 @@
 }
 .topbar .sep { width: 1px; height: 14px; background: #2f2a2a; }
 
-/* ---- module placement ---- */
+/* ---- module placement y animaciones de entrada escalonada ---- */
 .row-top {
   flex: 1 1 40%;
   min-height: 0;
@@ -88,7 +92,13 @@
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
+  
+  /* Animación: Calendario (Entra primero) */
+  opacity: 0;
+  animation: slideFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.1s; 
 }
+
 .row-bottom {
   flex: 1 1 60%;
   min-height: 0;
@@ -97,6 +107,7 @@
   gap: 18px;
   align-items: stretch;
 }
+
 .module-frame {
   border-radius: 20px;
   overflow: hidden;
@@ -106,4 +117,18 @@
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   min-height: 0;
+}
+
+/* Animación: Hora por Hora (Entra segundo, con más retraso para que cargue la tabla) */
+.row-bottom > .module-frame:nth-child(1) {
+  opacity: 0;
+  animation: slideFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.45s; 
+}
+
+/* Animación: Control de Acceso (Entra al final) */
+.row-bottom > .module-frame:nth-child(2) {
+  opacity: 0;
+  animation: slideFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 0.65s; 
 }

@@ -1,7 +1,7 @@
 /* ============================================================
-   calendario.js — LÓGICA solamente. El HTML vive en
-   template/partials/calendario.html. Clona plantillas y rellena
-   datos; no contiene marcado.
+   calendario.js — LÓGICA
+   Genera letras basadas en bitmaps. Días pasados/actuales (verde), 
+   incidentes (rojo solo si ya pasaron), y días futuros (gris).
    ============================================================ */
 (function () {
   var R = "#FF4133", B = "#38BDF8", A = "#F5A623", N = "#C9CDD4";
@@ -11,6 +11,7 @@
     var dull = "conic-gradient(from 140deg,#1d1d21 0deg,#33333a 50deg,#18181c 110deg,#2b2b32 180deg,#17171a 250deg,#303038 320deg,#1d1d21 360deg)";
     var faceLit = "linear-gradient(165deg,#26262b,#17171b 60%,#101013 100%)";
     var faceDim = "linear-gradient(165deg,#141417,#0d0d10 60%,#09090b 100%)";
+    
     if (status === "ok") return { bezel: polished, face: faceLit, led: "inset 0 0 0 1.5px rgba(31,230,40,.96), inset 0 0 17px rgba(31,230,40,.6), inset 0 -6px 12px rgba(0,0,0,.5)", num: "#F4F1F0", numShadow: "0 1px 2px rgba(0,0,0,.85)" };
     if (status === "incident") return { bezel: polished, face: faceLit, led: "inset 0 0 0 1.5px rgba(255,99,88,.92), inset 0 0 16px rgba(255,99,88,.5), inset 0 -6px 12px rgba(0,0,0,.5)", num: "#F4F1F0", numShadow: "0 1px 2px rgba(0,0,0,.85)" };
     return { bezel: dull, face: faceDim, led: "inset 0 0 0 1px rgba(150,140,138,.16), inset 0 -6px 12px rgba(0,0,0,.55)", num: "#6A625E", numShadow: "none" };
@@ -18,16 +19,23 @@
 
   function buildLetter(bitmap, incidents, today, daysInMonth) {
     var rows = [], day = 1;
-    var nearIncident = incidents.some(function (d) { return d > daysInMonth - 3; });
+    var nearIncident = incidents.some(function (d) { return d > daysInMonth - 3 && d <= today; });
     var fillStatus = nearIncident ? "incident" : "ok";
+    
     bitmap.forEach(function (line) {
       var cells = [];
       for (var c = 0; c < line.length; c++) {
         if (line[c] !== "1") continue;
         var d = day; day++;
         var status, text;
-        if (d > daysInMonth) { status = fillStatus; text = ""; }
-        else { text = String(d); status = incidents.indexOf(d) !== -1 ? "incident" : (d <= today ? "ok" : "future"); }
+        
+        if (d > daysInMonth) { 
+          status = fillStatus; text = ""; 
+        } else { 
+          text = String(d); 
+          // CORRECCIÓN: Prioridad absoluta al futuro. Si d > today, es gris.
+          status = (d > today) ? "future" : (incidents.indexOf(d) !== -1 ? "incident" : "ok"); 
+        }
         cells.push(Object.assign({ col: c + 1, text: text, isToday: (text !== "" && d === today), clickable: status === "incident" }, styleFor(status)));
       }
       if (cells.length) rows.push(cells);
@@ -35,7 +43,8 @@
     return rows;
   }
 
-  function cats(daysInMonth) {
+  // CORRECCIÓN: Se recibe 'todayDate' para filtrar incidentes futuros
+  function cats(daysInMonth, todayDate) {
     var S = ["1111111","1100000","1100000","1111111","0000011","0000011","0000011","1111111"];
     var Q = ["0111110","1100011","1100011","1100011","1100011","1101011","0111110","0000111"];
     var C = ["0111110","1111111","1100000","1100000","1100000","1100000","1111111","0111110"];
@@ -71,7 +80,8 @@
         events:[ {day:10,type:"con",area:"Zona A",shift:"A",desc:"Herramienta fuera de silueta en tablero."},{day:21,type:"con",area:"Zona C",shift:"B",desc:"Material sin identificación en piso."} ] },
     ];
     return list.map(function (cat) {
-      return Object.assign({}, cat, { events: cat.events.filter(function (e) { return e.day <= daysInMonth; }) });
+      // CORRECCIÓN: Filtramos usando todayDate para asegurar que ningún incidente futuro se muestre o calcule
+      return Object.assign({}, cat, { events: cat.events.filter(function (e) { return e.day <= todayDate; }) });
     });
   }
 
@@ -84,16 +94,26 @@
     var daysInMonth = new Date(year, month + 1, 0).getDate();
     var monthLabel = today.toLocaleString("en-US", { month: "long" }).toUpperCase() + " " + year;
     var monthName = today.toLocaleString("es-ES", { month: "long" }).toUpperCase() + " " + year;
-    var CATS = cats(daysInMonth);
+    
+    // Pasamos el día actual 'td' para hacer el corte
+    var CATS = cats(daysInMonth, td); 
     var grid = root.querySelector(".cal-grid");
+
+    var fragment = document.createDocumentFragment();
 
     CATS.forEach(function (cat, idx) {
       var col = clone("tpl-cal-col");
+      
+      col.classList.add("animate-entry");
+      col.style.animationDelay = (0.3 + (idx * 0.05)) + "s";
+
       col.querySelector(".glyph").textContent = cat.glyph;
       col.querySelector(".col-label").textContent = cat.label;
       col.querySelector(".month").textContent = monthLabel;
       var letter = col.querySelector(".letter");
+      
       var rows = buildLetter(cat.shape, cat.events.map(function (e) { return e.day; }), td, daysInMonth);
+      
       rows.forEach(function (cells) {
         var lrow = el("div", "lrow");
         cells.forEach(function (d) {
@@ -101,21 +121,26 @@
           day.style.gridColumn = d.col;
           day.style.background = d.bezel;
           day.style.cursor = d.clickable ? "pointer" : "default";
+          
           var face = day.querySelector(".face");
           face.style.background = d.face;
           face.style.boxShadow = d.led;
+          
           var num = day.querySelector(".num");
           num.style.color = d.num;
           num.style.textShadow = d.numShadow;
           num.textContent = d.text;
+          
           if (d.isToday) day.appendChild(el("div", "today-ring"));
           if (d.clickable) day.addEventListener("click", function () { openModal(idx); });
           lrow.appendChild(day);
         });
         letter.appendChild(lrow);
       });
-      grid.appendChild(col);
+      fragment.appendChild(col);
     });
+
+    grid.appendChild(fragment);
 
     function openModal(selIdx) {
       closeModal();
@@ -131,21 +156,24 @@
       for (var dd = 1; dd <= daysInMonth; dd++) {
         var evs = eventsByDay[dd];
         if (evs) streak = 0; else { streak += 1; if (streak > best) best = streak; }
-        rawRows.push({ day: dd, events: evs || [] });
+        // CORRECCIÓN PARA MODAL: Evitamos que el xAxis renderice datos después del día actual
+        if (dd <= td) {
+          rawRows.push({ day: dd, events: evs || [] });
+        }
       }
 
       var m = clone("tpl-cal-modal");
       m.querySelector(".m-title").textContent = sel.detailTitle;
       m.querySelector(".m-sub").textContent = "Plant North · Line 04 · " + monthLabel;
       m.querySelector(".metric-title").textContent = sel.metricTitle;
-      m.querySelector(".stat-good .v").textContent = daysInMonth - sel.events.length;
+      // Ajustamos el "Días sin incidente" solo al total de días que ya ocurrieron
+      m.querySelector(".stat-good .v").textContent = td - sel.events.length;
       m.querySelector(".stat-good .k").textContent = sel.goodStatLabel;
       m.querySelector(".streak").textContent = best;
       m.querySelector(".stat-bad .v").textContent = sel.events.length;
       m.querySelector(".stat-bad .k").textContent = sel.badStatLabel;
       m.querySelector(".month-lbl").textContent = monthName;
 
-      // legend
       var legBox = m.querySelector(".m-legend");
       var legendItems = [{ color: "#22E62C", label: sel.goodLabel }].concat(Object.keys(sel.types).map(function (k) { return { color: sel.types[k].color, label: sel.types[k].label }; }));
       legendItems.forEach(function (l) {
@@ -156,7 +184,6 @@
         legBox.appendChild(it);
       });
 
-      // plot + xaxis
       var plot = m.querySelector(".plot");
       var xaxis = m.querySelector(".xaxis");
       rawRows.forEach(function (rr) {
@@ -195,7 +222,6 @@
         xaxis.appendChild(x);
       });
 
-      // event list
       var evlist = m.querySelector(".evlist");
       sel.events.slice().sort(function (a, b) { return a.day - b.day; }).forEach(function (a) {
         var c = typeColor(a.type);
@@ -214,6 +240,17 @@
       document.body.appendChild(m);
       root._modal = m;
     }
-    function closeModal() { if (root._modal) { root._modal.remove(); root._modal = null; } }
+
+    function closeModal() { 
+      if (root._modal && !root._modal.classList.contains("is-closing")) { 
+        root._modal.classList.add("is-closing"); 
+        setTimeout(function () {
+          if (root._modal) { 
+            root._modal.remove(); 
+            root._modal = null; 
+          }
+        }, 180);
+      } 
+    }
   };
 })();

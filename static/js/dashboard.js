@@ -1,5 +1,5 @@
 /* ============================================================
-   dashboard.js — top-bar clock, stage scaling and module boot.
+   dashboard.js — reloj del top-bar, escalado del stage y boot.
    ============================================================ */
 (function () {
   function pad(n) { return String(n).padStart(2, "0"); }
@@ -7,9 +7,15 @@
   function fitStage() {
     var stage = document.querySelector(".stage");
     if (!stage) return;
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var s = Math.min(vw / 1920, vh / 1080);
+    var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
     stage.style.transform = "translate(-50%,-50%) scale(" + s + ")";
+  }
+
+  // resize acotado a 1 frame: evita recalcular escala en cada evento (dropframe)
+  var rafId = null;
+  function onResize() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(function () { rafId = null; fitStage(); });
   }
 
   function tickClock() {
@@ -26,9 +32,9 @@
     window.initAcceso(document.getElementById("mod-acceso"));
 
     tickClock();
-    setInterval(tickClock, 1000);
+    setInterval(tickClock, 1000);   // reloj: 1s (barato, solo 2 textos)
 
     fitStage();
-    window.addEventListener("resize", fitStage);
+    window.addEventListener("resize", onResize);
   });
 })();

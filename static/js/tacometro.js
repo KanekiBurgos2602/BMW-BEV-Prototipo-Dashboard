@@ -17,42 +17,46 @@
     return el;
   }
 
-  // append the generative graduation into the (empty) <g class="ticks">
+  // Generación de marcas con volcado único al DOM (optimizado)
   function fillTicks(g, value) {
     var ACC = "#22E62C";
     var majors = 8, steps = majors * 4;
     var activeIdx = Math.round((value / 100) * majors);
 
+    var fragment = document.createDocumentFragment();
+
     for (var k = 0; k <= steps; k++) {
       if (k % 4 === 0) continue;
       var a = (-130 + (k / steps) * 260) * Math.PI / 180;
       var p1 = pt(87, a), p2 = pt(93, a);
-      g.appendChild(svg("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: "rgba(255,255,255,.15)", "stroke-width": 1, "stroke-linecap": "round" }));
+      fragment.appendChild(svg("line", { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: "rgba(255,255,255,.15)", "stroke-width": 1, "stroke-linecap": "round" }));
     }
     for (var i = 0; i <= majors; i++) {
       var na = (i / majors * 260 - 130) * Math.PI / 180;
       var on = i === activeIdx;
       var t1 = pt(on ? 78 : 82, na), t2 = pt(93, na);
-      g.appendChild(svg("line", { x1: t1[0], y1: t1[1], x2: t2[0], y2: t2[1], stroke: on ? ACC : "rgba(255,200,190,.55)", "stroke-width": on ? 3.4 : 2.2, "stroke-linecap": "round" }));
+      fragment.appendChild(svg("line", { x1: t1[0], y1: t1[1], x2: t2[0], y2: t2[1], stroke: on ? ACC : "rgba(255,200,190,.55)", "stroke-width": on ? 3.4 : 2.2, "stroke-linecap": "round" }));
       var np = pt(69, na);
       var glow = on ? "drop-shadow(0 0 5px " + ACC + ") drop-shadow(0 1px 2px rgba(0,0,0,.95))" : "drop-shadow(0 1px 2px rgba(0,0,0,.95))";
-      g.appendChild(svg("text", { x: np[0], y: np[1], "text-anchor": "middle", "dominant-baseline": "central", fill: on ? "#FFFFFF" : "#E9DAD6" },
+      fragment.appendChild(svg("text", { x: np[0], y: np[1], "text-anchor": "middle", "dominant-baseline": "central", fill: on ? "#FFFFFF" : "#E9DAD6" },
         "font:" + (on ? "800" : "700") + " 12px 'Saira Condensed';letter-spacing:.5px;filter:" + glow, String(i)));
     }
     for (var m = 0; m < majors; m++) {
       var mf = (m + 0.5) / majors;
       var ma = (-130 + mf * 260) * Math.PI / 180;
       var mp = pt(61.5, ma);
-      g.appendChild(svg("text", { x: mp[0], y: mp[1], "text-anchor": "middle", "dominant-baseline": "central", fill: ACC + "99" },
+      fragment.appendChild(svg("text", { x: mp[0], y: mp[1], "text-anchor": "middle", "dominant-baseline": "central", fill: ACC + "99" },
         "font:400 5px 'Share Tech Mono';letter-spacing:.2px", String(Math.round(mf * 100)).padStart(2, "0")));
     }
     for (var o = 1; o <= 8; o++) {
       var of = o / 9;
       var oa = (-130 + of * 260) * Math.PI / 180;
       var op = pt(84.5, oa);
-      g.appendChild(svg("text", { x: op[0], y: op[1], "text-anchor": "middle", "dominant-baseline": "central", fill: "rgba(255,235,232,.5)" },
+      fragment.appendChild(svg("text", { x: op[0], y: op[1], "text-anchor": "middle", "dominant-baseline": "central", fill: "rgba(255,235,232,.5)" },
         "font:400 4px 'Share Tech Mono';letter-spacing:.2px", String(o * 5).padStart(2, "0")));
     }
+
+    g.appendChild(fragment);
   }
 
   window.buildTacometro = function (props) {
@@ -71,16 +75,24 @@
     if (isLeader) el.classList.add("leader");
     if (detail) el.classList.add("detail");
 
-    // gauge geometry (data-driven; static skeleton is in the template)
+    // Geometría del medidor
     fillTicks(el.querySelector(".ticks"), value);
     el.querySelector(".arc-glow").setAttribute("stroke-dasharray", arc + " 552.92");
     el.querySelector(".arc-white").setAttribute("stroke-dasharray", arc + " 552.92");
     var tip = el.querySelector(".tip");
     tip.setAttribute("cx", +(100 + 88 * Math.sin(rad)).toFixed(2));
     tip.setAttribute("cy", +(100 - 88 * Math.cos(rad)).toFixed(2));
-    el.querySelector(".needle").style.transform = "rotate(" + deg.toFixed(2) + "deg)";
+    
+    // Animación fluida de la aguja: comienza en 0 (-130deg) y transiciona al valor real
+    var needle = el.querySelector(".needle");
+    needle.style.transform = "rotate(-130deg)";
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        needle.style.transform = "rotate(" + deg.toFixed(2) + "deg)";
+      });
+    });
 
-    // identity
+    // Identidad
     var nm = String(props.opName || "Operador").trim();
     var initials = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join("");
     el.querySelector(".initials").textContent = initials;

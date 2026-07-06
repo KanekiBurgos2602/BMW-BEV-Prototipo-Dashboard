@@ -1,14 +1,17 @@
 /* ============================================================
-   hora.js — LÓGICA solamente. El HTML vive en
-   template/partials/hora.html. Resuelve el turno operativo desde
-   el reloj y actualiza la tabla cada segundo por DOM.
+   hora.js — LÓGICA
+   Simulación ajustada al tiempo ciclo (78.0s) de BMW BEV y 
+   fórmula de eficiencia exacta (Max 100%).
    ============================================================ */
 (function () {
-  var RATE = 90;
+  // CONFIGURACIÓN DE PRODUCCIÓN
+  var CYCLE_TIME_SEC = 78.0; // Tiempo de ciclo en segundos
+  var REFRESH_MS = 5000;
 
   function toMin(s) { var p = s.split(":").map(Number); return p[0] * 60 + p[1]; }
   function durMin(s, e) { return ((toMin(e) - toMin(s)) + 1440) % 1440; }
 
+  // PRNG determinista para mantener valores estables
   function rng(seed) {
     var s = seed >>> 0;
     return function () {
@@ -17,6 +20,15 @@
       t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
       return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+  }
+
+  // FÓRMULA DE EFICIENCIA EXACTA
+  function calcularEficiencia(producidas, esperadas) {
+    if (esperadas > 0) {
+      var eficiencia = (parseFloat(producidas) / parseFloat(esperadas)) * 100;
+      return Math.min(Math.round(eficiencia), 100); // Límite estricto de 100%
+    }
+    return 0;
   }
 
   function shifts() {
@@ -40,7 +52,7 @@
     return { c: "#FF5347", g: "rgba(255,83,71,.5)" };
   }
 
-  function compute(rate) {
+  function compute() {
     var now = Date.now();
     var SHIFTS = shifts();
     var d = new Date(now);
@@ -58,13 +70,19 @@
 
     var shift = SHIFTS[shiftId];
     var cursor = startAbs, totalDur = 0;
+    
     var blocks = shift.blocks.map(function (b) {
       var dur = durMin(b[0], b[1]);
       var st = cursor, en = cursor + dur * 6e4;
       cursor = en; totalDur += dur;
-      var expected = Math.round(rate * dur / 60 * (b[2] ? 0.5 : 1));
+      
+      var durSeg = dur * 60;
+      var tiempoEfectivo = b[2] ? (durSeg * 0.5) : durSeg; 
+      var expected = Math.floor(tiempoEfectivo / CYCLE_TIME_SEC);
+      
       return { s: b[0], e: b[1], brk: b[2], st: st, en: en, expected: expected };
     });
+    
     var shiftEnd = startAbs + totalDur * 6e4;
     var simNow = waiting ? (shiftEnd + 1) : now;
 
@@ -74,22 +92,34 @@
       var effF = 0.86 + rnd() * 0.13;
       var prodFinal = Math.round(b.expected * effF);
       var qlFinal = Math.round(rnd() * rnd() * b.expected * 0.045);
+      
       var status, produced, ql, expElapsed;
-      if (simNow >= b.en) { status = "done"; produced = prodFinal; ql = qlFinal; expElapsed = b.expected; }
-      else if (simNow < b.st) { status = "pending"; produced = 0; ql = 0; expElapsed = 0; }
+      if (simNow >= b.en) { 
+        status = "done"; produced = prodFinal; ql = qlFinal; expElapsed = b.expected; 
+      }
+      else if (simNow < b.st) { 
+        status = "pending"; produced = 0; ql = 0; expElapsed = 0; 
+      }
       else {
         status = "active";
-        if (b.brk) { produced = prodFinal; ql = qlFinal; expElapsed = b.expected; }
+        if (b.brk) { 
+          produced = prodFinal; ql = qlFinal; expElapsed = b.expected; 
+        }
         else {
           var f = (simNow - b.st) / (b.en - b.st);
           produced = Math.round(prodFinal * f); ql = Math.round(qlFinal * f); expElapsed = b.expected * f;
         }
       }
+      
       sumExp += b.expected; sumExpElapsed += expElapsed; sumProd += produced; sumQL += ql;
-      var effP = expElapsed > 0 ? (produced / expElapsed) * 100 : 0;
+      
+      // La fila actual se sigue calculando contra su objetivo fijo de hora (ej: 13 / 46 = 28%)
+      var effP = calcularEficiencia(produced, b.expected);
+      
       var ec = effColor(effP);
       var qlP = produced > 0 ? (ql / produced) * 100 : 0;
       var isActive = status === "active", brk = b.brk;
+      
       return {
         label: b.s + " – " + b.e, status: status, isActive: isActive, brk: brk,
         tagText: brk ? "DESCANSO" : "EN CURSO",
@@ -103,10 +133,10 @@
         produced: status === "pending" ? "0" : String(produced),
         prodColor: status === "pending" ? "#5f5854" : "#F4ECEC",
         prodShadow: isActive ? "0 0 12px rgba(255,255,255,.18)" : "none",
-        effText: status === "pending" ? "—" : (Math.round(effP) + "%"),
+        effText: status === "pending" ? "—" : (effP + "%"),
         effColor: status === "pending" ? "#5f5854" : ec.c,
         effGlow: status === "pending" ? "transparent" : ec.g,
-        barPct: status === "pending" ? 0 : Math.max(0, Math.min(100, effP)),
+        barPct: status === "pending" ? 0 : effP,
         ql: status === "pending" ? "—" : (qlP.toFixed(1) + "%"),
         qlColor: (status !== "pending" && qlP > 0.05) ? (qlP > 3 ? "#FF5347" : "#F5A623") : "#6E5754",
         qlShadow: (status !== "pending" && qlP > 3) ? "0 0 10px rgba(255,83,71,.4)" : "none",
@@ -114,18 +144,23 @@
       };
     });
 
-    var totEffP = sumExpElapsed > 0 ? (sumProd / sumExpElapsed) * 100 : 0;
+    // TOTAL TURNO: La eficiencia global y las esperadas globales AHORA usan la sumatoria dinámica (sumExpElapsed)
+    var totEffP = calcularEficiencia(sumProd, Math.round(sumExpElapsed));
     var tec = effColor(totEffP);
     var startedAny = sumExpElapsed > 0;
     var totQLP = sumProd > 0 ? (sumQL / sumProd) * 100 : 0;
 
     return {
       shiftId: shiftId, shiftName: shift.name, waiting: waiting, rows: rows,
-      totalExpected: String(sumExp), totalProduced: String(Math.round(sumProd)),
-      totalEffText: startedAny ? (Math.round(totEffP) + "%") : "—",
+      
+      // FIX: Mostrar piezas esperadas hasta este minuto, NO las del turno completo.
+      totalExpected: String(Math.round(sumExpElapsed)), 
+      
+      totalProduced: String(Math.round(sumProd)),
+      totalEffText: startedAny ? (totEffP + "%") : "—",
       totalEffColor: startedAny ? tec.c : "#5f5854",
       totalEffGlow: startedAny ? tec.g : "transparent",
-      totalBarPct: startedAny ? Math.max(0, Math.min(100, totEffP)) : 0,
+      totalBarPct: startedAny ? totEffP : 0,
       totalQL: startedAny ? (totQLP.toFixed(1) + "%") : "—",
       totalQLColor: (startedAny && totQLP > 0.05) ? (totQLP > 3 ? "#FF5347" : "#F5A623") : "#6E5754",
     };
@@ -149,13 +184,12 @@
     var ql = el.querySelector(".ql"); ql.textContent = r.ql; ql.style.color = r.qlColor; ql.style.textShadow = r.qlShadow;
   }
 
-  window.initHora = function (root, rate) {
-    rate = Math.max(20, Math.round(rate || RATE));
+  window.initHora = function (root) {
     var rowsBox = root.querySelector(".hora-rows");
     var tpl = document.getElementById("tpl-hora-row");
 
     function render() {
-      var d = compute(rate);
+      var d = compute(); 
       root.querySelector(".shift-name").textContent = d.shiftName;
 
       root.querySelectorAll(".turno").forEach(function (t) {
@@ -166,10 +200,18 @@
 
       root.querySelector(".waiting-banner").style.display = d.waiting ? "" : "none";
 
-      // reconcile rows: reuse existing, add/remove as needed
       while (rowsBox.children.length > d.rows.length) rowsBox.removeChild(rowsBox.lastChild);
       while (rowsBox.children.length < d.rows.length) rowsBox.appendChild(tpl.content.firstElementChild.cloneNode(true));
-      d.rows.forEach(function (r, i) { fillRow(rowsBox.children[i], r); });
+      
+      d.rows.forEach(function (r, i) { 
+        var rowEl = rowsBox.children[i];
+        fillRow(rowEl, r); 
+        
+        if (!rowEl.classList.contains("animate-entry")) {
+          rowEl.classList.add("animate-entry");
+          rowEl.style.animationDelay = (0.4 + (i * 0.06)) + "s";
+        }
+      });
 
       var te = root.querySelector(".t-expected"); te.textContent = d.totalExpected;
       root.querySelector(".t-produced").textContent = d.totalProduced;
@@ -179,6 +221,6 @@
     }
 
     render();
-    setInterval(render, 1000);
+    setInterval(render, REFRESH_MS);
   };
 })();

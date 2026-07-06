@@ -1,10 +1,8 @@
 /* ============================================================
-   acceso.css — Control de Acceso operators grid + detail overlay
+   acceso.css — Control de Acceso
    ============================================================ */
-
 .acc-wrap { flex: 1; min-height: 0; padding: 12px 14px; display: flex; flex-direction: column; }
 .acc-panel { padding: 16px 20px 18px; }
-
 .acc-divider { margin: 12px 0; }
 
 .acc-subhead { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex: 0 0 auto; }
@@ -19,6 +17,7 @@
   grid-template-columns: repeat(5, minmax(0,1fr));
   grid-template-rows: repeat(2, minmax(0,1fr));
   gap: 8px;
+  contain: layout style; 
 }
 .acc-cell { cursor: pointer; min-height: 0; min-width: 0; display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; }
 
@@ -27,10 +26,12 @@
   position: absolute; inset: 0; z-index: 40;
   display: flex; align-items: center; justify-content: center;
   padding: 24px;
-  background: rgba(4,4,6,.74);
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  background: rgba(4,4,6,.85); /* Mayor opacidad para suavizar la falta de blur pesado */
+  backdrop-filter: blur(2px); /* Reducido de 4px a 2px para evitar caídas catastróficas de fps */
+  -webkit-backdrop-filter: blur(2px);
   border-radius: 22px;
   animation: modalFade .16s ease;
+  will-change: opacity;
 }
 .acc-overlay .sheet {
   position: relative;
@@ -38,8 +39,8 @@
   border-radius: 20px;
   background: linear-gradient(180deg,#141418,#0b0b0d);
   border: 1px solid #2d2d34;
-  box-shadow: 0 50px 100px -30px rgba(0,0,0,.95);
   animation: modalPop .2s cubic-bezier(.22,.85,.24,1);
+  will-change: transform, opacity;
 }
 .acc-overlay .close {
   position: absolute; top: 12px; right: 12px; z-index: 2;
@@ -47,4 +48,27 @@
   border: 1px solid #35353d; background: #17171b; color: #C9BFBD;
   font: 700 18px/1 var(--font-head); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+}
+
+/* ============================================================
+   Animaciones de Salida para el Overlay
+   ============================================================ */
+@keyframes modalFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes modalPopOut {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(16px) scale(.97); }
+}
+
+/* Clase que inyectará JS antes de eliminar el elemento */
+.acc-overlay.is-closing {
+  /* 'forwards' congela el último frame (invisible) para evitar parpadeos */
+  animation: modalFadeOut .16s ease forwards;
+  pointer-events: none; /* Evita múltiples clics mientras se cierra */
+}
+
+.acc-overlay.is-closing .sheet {
+  animation: modalPopOut .16s cubic-bezier(.22,.85,.24,1) forwards;
 }

@@ -1,10 +1,6 @@
 /* ============================================================
    base.css — tokens, tipografías, reset, animaciones y "chrome"
-   compartido por todos los paneles del dashboard.
    ============================================================ */
-
-@import url("https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Oxanium:wght@500;600;700&family=Saira+Condensed:wght@500;600;700&family=Share+Tech+Mono&display=swap");
-
 :root {
   --green:   #22E62C;
   --red:     #FF5347;
@@ -47,6 +43,21 @@ html, body {
 @keyframes modalFade { from{opacity:0} to{opacity:1} }
 @keyframes modalPop  { from{opacity:0;transform:translateY(16px) scale(.97)} to{opacity:1;transform:none} }
 
+/* ============================================================
+   OPTIMIZACIÓN DE GPU: Forzar hilos compuestos (Compositor)
+   ============================================================ */
+.online-badge .dot,
+.clock-pill .dot,
+.turno.on .dot,
+.waiting-banner .dot,
+.taco .center .halo,
+.taco .center .chip .d,
+.day .today-ring {
+  will-change: opacity, transform;
+  transform: translateZ(0); /* Crea una capa independiente en GPU */
+  backface-visibility: hidden;
+}
+
 /* ---- outer surface each component sits on ---- */
 .surface {
   height: 100%;
@@ -62,7 +73,7 @@ html, body {
   flex-direction: column;
 }
 
-/* ---- the machined metal panel (repeated in every module) ---- */
+/* ---- the machined metal panel ---- */
 .panel {
   position: relative;
   flex: 1;
@@ -82,13 +93,9 @@ html, body {
     linear-gradient(#1a1a1f 25%,#161619 25%,#161619 50%,transparent 50%,transparent 75%,#202026 75%,#202026);
   background-position: 0 5px,10px 0,0 10px,10px 5px,0 0,0 0;
   background-size: 20px 20px;
-  box-shadow:
-    0 40px 90px -40px rgba(0,0,0,.9),
-    inset 0 1px 0 rgba(255,255,255,.06),
-    inset 0 0 0 1px rgba(0,0,0,.4);
+  box-shadow: 0 40px 90px -40px rgba(0,0,0,.9); /* Reducidos los insets internos redundantes */
 }
 
-/* neutral depth vignette overlay */
 .panel-vignette {
   position: absolute;
   inset: 0;
@@ -110,7 +117,6 @@ html, body {
   border-radius: 12px;
   background: linear-gradient(180deg,#1b1d22,#0f1115);
   border: 1px solid #2b2e35;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 8px -4px rgba(0,0,0,.7);
 }
 .panel-header .title-group { display: flex; align-items: center; gap: 12px; }
 .panel-title {
@@ -125,7 +131,6 @@ html, body {
   background: linear-gradient(160deg,#1a1c21,#111318);
   border: 1px solid #34383f;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,.06), 0 0 10px -2px rgba(240,71,59,.4);
 }
 
 /* "ONLINE" status pill */
@@ -150,14 +155,42 @@ html, body {
   background: linear-gradient(90deg, transparent, var(--hair), transparent);
 }
 
-/* inset console area (table / grid backdrop) */
+/* inset console area */
 .console {
   position: relative;
   background: linear-gradient(180deg,#0e0e11,#090909);
   border: 1px solid #26262b;
   border-radius: 14px;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.05),
-    inset 0 -16px 34px rgba(0,0,0,.5),
-    0 2px 0 rgba(0,0,0,.4);
+}
+
+/* ============================================================
+   ANIMACIONES FLUIDAS (GPU)
+   ============================================================ */
+
+/* Animación de entrada: Aparece y sube ligeramente */
+@keyframes slideFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Animación de carga: Pulso de opacidad para esqueleto */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 0.15; }
+}
+
+/* Clase para aplicar estado de carga en contenedores vacíos */
+.loading-skeleton {
+  background: #1e1e24;
+  border-radius: 12px;
+  animation: skeletonPulse 1.2s ease-in-out infinite;
+  will-change: opacity;
+}
+
+/* Clase general para elementos que entrarán con animación */
+.animate-entry {
+  opacity: 0; 
+  /* cubic-bezier da un efecto de "frenado" suave al final */
+  animation: slideFadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity, transform;
 }

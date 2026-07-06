@@ -38,36 +38,38 @@
   border-radius: 10px;
   padding: 8px 5px 10px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -16px 34px rgba(0,0,0,.5), 0 2px 0 rgba(0,0,0,.4);
+  contain: layout paint; /* Optimización GPU */
 }
-.cal-col .col-head { display: flex; align-items: center; gap: 6px; margin-bottom: 9px; }
+
+.cal-col .col-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
 .cal-col .glyph-box {
-  width: 17px; height: 17px; flex-shrink: 0;
+  width: 22px; height: 22px; flex-shrink: 0;
   border-radius: 5px;
   background: linear-gradient(150deg,#2a2a2f,#141417);
   border: 1px solid #3a3a40;
   display: flex; align-items: center; justify-content: center;
   box-shadow: inset 0 1px 1px rgba(255,255,255,.18), 0 0 8px rgba(226,54,43,.18);
 }
-.cal-col .glyph { font: 700 10px/1 var(--font-head); color: #FF6F63; text-shadow: 0 0 8px rgba(226,54,43,.5); }
+.cal-col .glyph { font: 700 13px/1 var(--font-head); color: #FF6F63; text-shadow: 0 0 8px rgba(226,54,43,.5); }
 .cal-col .col-label {
   flex: 1; min-width: 0;
-  font: 700 8px/1.1 var(--font-head);
+  font: 700 10px/1.1 var(--font-head);
   letter-spacing: .05em; color: #E7DAD8;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .cal-col .month {
   text-align: center;
-  font: 700 10.5px/1 var(--font-cond);
-  letter-spacing: .09em; color: #EDE4DC;
+  font: 700 13px/1 var(--font-cond);
+  letter-spacing: .1em; color: #EDE4DC;
   text-shadow: 0 0 14px rgba(226,54,43,.35), 0 1px 1px rgba(0,0,0,.6);
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 .cal-col .letter {
   flex: 1; min-height: 0;
   display: flex; flex-direction: column; justify-content: center;
-  width: 100%; max-width: 110px; margin: 0 auto;
+  width: 100%; max-width: 170px; margin: 0 auto;
 }
-.cal-col .letter .lrow { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-bottom: 2px; }
+.cal-col .letter .lrow { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; margin-bottom: 3px; }
 
 /* a single day tile */
 .day {
@@ -76,6 +78,7 @@
   border-radius: 4px;
   padding: 1px;
   box-shadow: 0 2px 5px rgba(0,0,0,.55), inset 0 1px 1px rgba(255,255,255,.28), inset 0 -1px 2px rgba(0,0,0,.6);
+  contain: layout paint; /* Optimización GPU */
 }
 .day .face {
   position: relative;
@@ -92,7 +95,8 @@
   position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
   background: radial-gradient(120% 90% at 30% 14%, rgba(255,255,255,.16), transparent 46%);
 }
-.day .face .num { position: relative; font: 700 italic 8.5px/1 var(--font-cond); }
+.day .face .num { position: relative; font: 700 italic 16px/1 var(--font-cond); } /* Tamaño de número aumentado */
+
 .day .today-ring {
   position: absolute; inset: -1px;
   border-radius: 6px;
@@ -100,6 +104,7 @@
   box-shadow: 0 0 9px rgba(255,255,255,.5);
   pointer-events: none;
   animation: ringPulse 1.7s ease-in-out infinite;
+  will-change: opacity, transform; /* Optimización GPU */
 }
 
 /* ---- detail modal ---- */
@@ -110,7 +115,18 @@
   background: rgba(6,6,8,.66);
   backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
   animation: modalFade .18s ease;
+  will-change: opacity; /* Optimización GPU */
 }
+
+/* SALIDA ANIMADA MODAL */
+.cal-modal.is-closing {
+  animation: modalFadeOut .18s ease forwards;
+  pointer-events: none;
+}
+.cal-modal.is-closing .sheet {
+  animation: modalPopOut .18s cubic-bezier(.22,.85,.24,1) forwards;
+}
+
 .cal-modal .sheet {
   position: relative;
   width: min(880px,96vw); max-height: 92vh; overflow: auto;
@@ -129,6 +145,7 @@
   border: 1px solid #2c2c31;
   box-shadow: 0 50px 120px -30px rgba(0,0,0,.95), 0 0 0 1px rgba(255,80,70,.12), inset 0 1px 0 rgba(255,255,255,.06);
   animation: modalPop .22s cubic-bezier(.22,.85,.24,1);
+  will-change: transform, opacity; /* Optimización GPU */
 }
 .cal-modal .m-head { position: relative; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .cal-modal .m-head .l { display: flex; align-items: center; gap: 12px; }

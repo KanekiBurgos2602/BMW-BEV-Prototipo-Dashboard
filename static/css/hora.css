@@ -1,7 +1,6 @@
 /* ============================================================
    hora.css — Hora por Hora production table
    ============================================================ */
-
 .hora-wrap { flex: 1; min-height: 0; padding: 12px 14px; display: flex; flex-direction: column; }
 .hora-panel { padding: 14px 18px 14px; }
 
@@ -14,15 +13,14 @@
 .turno.on {
   background: linear-gradient(180deg,rgba(34,230,44,.08),transparent);
   border-color: rgba(34,230,44,.42);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 .turno.on .dot { background: var(--green); box-shadow: 0 0 9px rgba(34,230,44,.85); animation: pulse 2s infinite; }
 .turno.on .name { color: #F1E4E2; }
 .turno.on .win { color: #A98C88; }
+
 .turno.paused {
   background: linear-gradient(180deg,rgba(245,166,35,.08),transparent);
   border-color: rgba(245,166,35,.42);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 .turno.paused .dot { background: var(--amber); box-shadow: 0 0 9px rgba(245,166,35,.7); }
 .turno.paused .name { color: #F1E4E2; }
@@ -34,15 +32,14 @@
 .waiting-banner {
   position: relative; display: flex; align-items: center; gap: 12px;
   margin-bottom: 16px; border-radius: 12px; padding: 13px 16px;
-  background: linear-gradient(180deg,#1a1414,#0d0a0b);
+  background: #1a1414;
   border: 1px solid #3a2a28; border-left: 3px solid var(--amber);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 .waiting-banner .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber); animation: pulse 1.6s infinite; }
 .waiting-banner .msg { font: 600 11px/1.4 var(--font-head); letter-spacing: .06em; color: #E7D8B8; }
 
 /* table */
-.hora-table { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 6px; overflow: hidden; }
+.hora-table { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 6px; overflow: hidden; contain: content; }
 .hrow {
   display: grid;
   grid-template-columns: minmax(150px,1.4fr) 80px 90px minmax(150px,1.7fr) 78px;
@@ -59,16 +56,18 @@
   border-radius: 9px;
   background: linear-gradient(180deg,rgba(255,255,255,.015),transparent);
   border: 1px solid rgba(120,120,128,.12);
+  contain: layout style;
 }
 .hrow.data.active-ok {
   background: linear-gradient(180deg,rgba(34,230,44,.09),rgba(34,230,44,.02));
   border-color: rgba(34,230,44,.42);
-  box-shadow: 0 0 18px -4px rgba(34,230,44,.4), inset 0 1px 0 rgba(255,255,255,.05);
+  /* Atenuadas sombras radiales costosas */
+  box-shadow: 0 4px 10px -4px rgba(34,230,44,.2); 
 }
 .hrow.data.active-brk {
   background: linear-gradient(180deg,rgba(245,166,35,.09),rgba(245,166,35,.02));
   border-color: rgba(245,166,35,.42);
-  box-shadow: 0 0 18px -4px rgba(245,166,35,.4), inset 0 1px 0 rgba(255,255,255,.05);
+  box-shadow: 0 4px 10px -4px rgba(245,166,35,.2);
 }
 
 .hcell-hora { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; }
@@ -79,14 +78,14 @@
 .hcell-num { font: 700 italic 18px/.9 var(--font-cond); text-align: center; }
 .hcell-eff { display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .hcell-eff .val { font: 700 italic 17px/.9 var(--font-cond); }
-.bar-track { position: relative; width: 100%; height: 5px; border-radius: 3px; background: #1a1a1e; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
+.bar-track { position: relative; width: 100%; height: 5px; border-radius: 3px; background: #1a1a1e; overflow: hidden; }
 .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
 
 /* totals */
 .hrow.total {
   padding: 12px 16px 10px; margin: 2px 4px;
   border-radius: 10px;
-  background: linear-gradient(180deg,#161318,#0d0a0c);
+  background: #110d0f;
   border: 1px solid #3a2a28;
 }
 .hrow.total .label { font: 700 11px/1 var(--font-head); letter-spacing: .18em; text-transform: uppercase; color: #E7DAD8; }
