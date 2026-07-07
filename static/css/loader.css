@@ -1,0 +1,120 @@
+/* ============================================================
+   loader.css — Pantalla de carga (boot screen)
+   Ligera y fluida: solo anima opacity/transform (compuesto en GPU).
+   Sin box-shadow ni filtros animados para evitar repaints y dropframes.
+   ============================================================ */
+
+#boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  /* Textura de tejido/carbono repetida + velo radial para legibilidad */
+  background-color: #060607;
+  background-image:
+    radial-gradient(120% 85% at 50% 40%, rgba(6,6,7,.35), rgba(5,5,6,.85) 78%),
+    url("../img/boot-texture.png");
+  background-repeat: no-repeat, repeat;
+  background-size: cover, 95px 41px;
+  /* GPU: capa propia para que el fade-out no repinte el dashboard */
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  transition: opacity 0.6s ease;
+}
+
+/* Estado de salida: se desvanece antes de retirarse del DOM */
+#boot-screen.boot-hide { opacity: 0; }
+
+/* ---- Marca central ---- */
+.boot-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  opacity: 0;
+  animation: bootFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: opacity, transform;
+}
+.boot-brand .boot-logo {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+.boot-brand .boot-title {
+  font: 700 15px/1 var(--font-head);
+  letter-spacing: .32em;
+  color: var(--ink);
+  text-transform: uppercase;
+}
+.boot-brand .boot-sub {
+  font: 600 10px/1.4 var(--font-head);
+  letter-spacing: .28em;
+  color: var(--red-soft);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* ---- Barra de progreso ---- */
+.boot-progress {
+  position: relative;
+  width: 320px;
+  height: 3px;
+  border-radius: 3px;
+  background: #1c1c22;
+  overflow: hidden;
+  opacity: 0;
+  animation: bootFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+}
+.boot-progress .boot-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--red-dk), var(--red-soft));
+  transform-origin: left center;
+  transform: scaleX(0);
+  /* Llenado suave; scaleX se compone en GPU (no reflow) */
+  animation: bootFill 2.1s cubic-bezier(0.5, 0, 0.1, 1) 0.2s forwards;
+  will-change: transform;
+}
+
+/* ---- Estado + spinner minimalista ---- */
+.boot-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  opacity: 0;
+  animation: bootFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.24s forwards;
+}
+.boot-status .boot-ring {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,99,88,.25);
+  border-top-color: var(--red-soft);
+  animation: bootSpin 0.9s linear infinite;
+  will-change: transform;
+}
+.boot-status .boot-label {
+  font: 400 10px/1 var(--font-mono);
+  letter-spacing: .16em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+
+@keyframes bootFadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bootFill {
+  0%   { transform: scaleX(0); }
+  55%  { transform: scaleX(0.7); }
+  100% { transform: scaleX(1); }
+}
+@keyframes bootSpin {
+  to { transform: rotate(360deg); }
+}

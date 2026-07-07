@@ -3,20 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard BMW BEV — Línea 3</title>
+  <title>Dashboard BMW BEV</title>
 
+  <link rel="icon" type="image/x-icon" href="static/img/favicon.ico">
   <link rel="stylesheet" href="static/css/base.css">
   <link rel="stylesheet" href="static/css/dashboard.css">
   <link rel="stylesheet" href="static/css/calendario.css">
   <link rel="stylesheet" href="static/css/hora.css">
   <link rel="stylesheet" href="static/css/acceso.css">
   <link rel="stylesheet" href="static/css/tacometro.css">
+  <link rel="stylesheet" href="static/css/loader.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Oxanium:wght@500;600;700&family=Saira+Condensed:wght@500;600;700&family=Share+Tech+Mono&display=swap">
 
 </head>
 <body>
+
+  <!-- PANTALLA DE CARGA (boot) -->
+  <div id="boot-screen">
+    <div class="boot-brand">
+      <img class="boot-logo" src="static/img/magna-white.png" alt="Magna">
+      <div class="boot-title">Autotek Mexico</div>
+      <div class="boot-sub">Digital Operations Management Platform<br>BMW BEV</div>
+    </div>
+    <div class="boot-progress"><div class="boot-fill"></div></div>
+    <div class="boot-status">
+      <span class="boot-ring"></span>
+      <span class="boot-label">Inicializando sistema&hellip;</span>
+    </div>
+  </div>
+
   <div class="viewport">
     <div class="stage">
 
@@ -58,5 +75,8 @@
   <script src="static/js/hora.js"></script>
   <script src="static/js/calendario.js"></script>
   <script src="static/js/dashboard.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="static/js/gauth.js"></script>
+  <script src="static/js/loader.js"></script>
 </body>
 </html>

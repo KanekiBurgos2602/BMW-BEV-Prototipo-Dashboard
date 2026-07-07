@@ -95,7 +95,17 @@
     // Identidad
     var nm = String(props.opName || "Operador").trim();
     var initials = nm.split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join("");
-    el.querySelector(".initials").textContent = initials;
+    var initEl = el.querySelector(".initials");
+    if (props.photo) {
+      // Foto real (p.ej. cuenta de Google): rellena el círculo, sin iniciales
+      initEl.textContent = "";
+      initEl.style.backgroundImage = "url('" + props.photo + "')";
+      initEl.style.backgroundSize = "cover";
+      initEl.style.backgroundPosition = "center";
+      initEl.style.backgroundRepeat = "no-repeat";
+    } else {
+      initEl.textContent = initials;
+    }
     el.querySelector(".role").textContent = props.role || (isLeader ? "TEAM LEADER" : "COLABORADOR");
     el.querySelector(".name").textContent = nm;
     el.querySelector(".opnum").textContent = props.opNum || "OP 000";

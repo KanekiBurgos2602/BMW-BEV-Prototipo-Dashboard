@@ -164,7 +164,6 @@
 
       var m = clone("tpl-cal-modal");
       m.querySelector(".m-title").textContent = sel.detailTitle;
-      m.querySelector(".m-sub").textContent = "Plant North · Line 04 · " + monthLabel;
       m.querySelector(".metric-title").textContent = sel.metricTitle;
       // Ajustamos el "Días sin incidente" solo al total de días que ya ocurrieron
       m.querySelector(".stat-good .v").textContent = td - sel.events.length;
